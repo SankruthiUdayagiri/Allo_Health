@@ -1,0 +1,163 @@
+@import "tailwindcss";
+
+:root {
+  --background: #050508;
+  --foreground: #f4f4f7;
+  
+  --primary-glow: radial-gradient(rgba(124, 58, 237, 0.15), rgba(0, 0, 0, 0));
+  --secondary-glow: radial-gradient(rgba(16, 185, 129, 0.15), rgba(0, 0, 0, 0));
+  --accent-glow: radial-gradient(rgba(249, 115, 22, 0.15), rgba(0, 0, 0, 0));
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar for Sleek Visuals */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #09090e;
+}
+::-webkit-scrollbar-thumb {
+  background: #27273a;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3e3e5c;
+}
+
+/* Glassmorphism Design Classes */
+.glass-card {
+  background: rgba(10, 10, 18, 0.65);
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+}
+
+.glass-input {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  backdrop-filter: blur(4px);
+  transition: all 0.2s ease;
+}
+
+.glass-input:focus {
+  border-color: rgba(99, 102, 241, 0.5);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.15);
+  outline: none;
+}
+
+/* Sleek ambient backglows */
+.bg-glow-purple {
+  background: var(--primary-glow);
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.bg-glow-emerald {
+  background: var(--secondary-glow);
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.bg-glow-orange {
+  background: var(--accent-glow);
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+/* Keyframe Animations */
+@keyframes pulse-emerald {
+  0%, 100% {
+    opacity: 0.9;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    opacity: 0.4;
+    box-shadow: 0 0 5px rgba(16, 185, 129, 0.1);
+  }
+}
+
+@keyframes pulse-amber {
+  0%, 100% {
+    opacity: 0.9;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+  }
+  50% {
+    opacity: 0.4;
+    box-shadow: 0 0 5px rgba(245, 158, 11, 0.1);
+  }
+}
+
+@keyframes pulse-rose {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(244, 63, 94, 0.6);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.96);
+    box-shadow: 0 0 8px rgba(244, 63, 94, 0.2);
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-pulse-emerald {
+  animation: pulse-emerald 2s infinite ease-in-out;
+}
+
+.animate-pulse-amber {
+  animation: pulse-amber 2s infinite ease-in-out;
+}
+
+.animate-pulse-rose {
+  animation: pulse-rose 1.5s infinite ease-in-out;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 25s linear infinite;
+}
+
+/* Shimmer Loading State */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  background-size: 200% 100%;
+  animation: loading-shimmer 1.8s infinite;
+}
+
+@keyframes loading-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
