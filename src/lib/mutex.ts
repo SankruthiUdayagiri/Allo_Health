@@ -31,18 +31,19 @@ export async function acquireLock(productId: string, warehouseId: string): Promi
   const lockKey = `lock:inventory:${productId}:${warehouseId}`;
 
   if (redis) {
+    const client = redis;
     const ttl = 5; // 5 seconds distributed TTL
     const maxRetries = 100;
     const retryDelay = 50; // 50ms poll delay
     const token = Math.random().toString(36).substring(2, 9);
 
     for (let i = 0; i < maxRetries; i++) {
-      const acquired = await redis.set(lockKey, token, { nx: true, ex: ttl });
+      const acquired = await client.set(lockKey, token, { nx: true, ex: ttl });
       if (acquired === "OK") {
         return async () => {
-          const currentToken = await redis.get(lockKey);
+          const currentToken = await client.get(lockKey);
           if (currentToken === token) {
-            await redis.del(lockKey);
+            await client.del(lockKey);
           }
         };
       }
