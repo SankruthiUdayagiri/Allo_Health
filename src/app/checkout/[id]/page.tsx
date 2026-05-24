@@ -55,7 +55,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
   const [confirming, setConfirming] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   
-  const TOTAL_DURATION_SECONDS = 3 * 60; // 3 minutes
+  const TOTAL_DURATION_SECONDS = 10 * 60; // 10 minutes
   const [timeLeft, setTimeLeft] = useState<number>(TOTAL_DURATION_SECONDS);
   const [isExpired, setIsExpired] = useState(false);
   
@@ -395,7 +395,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                     </div>
                     <h2 className="text-xl font-bold text-white mt-4">Hold Allocation Expired</h2>
                     <p className="text-xs leading-relaxed text-zinc-400 max-w-sm mx-auto font-medium">
-                      Your high-concurrency inventory reservation has hit the 3-minute timeout. Stock levels have been safely released to prevent catalog leakage.
+                      Your high-concurrency inventory reservation has hit the 10-minute timeout. Stock levels have been safely released to prevent catalog leakage.
                     </p>
                   </div>
 

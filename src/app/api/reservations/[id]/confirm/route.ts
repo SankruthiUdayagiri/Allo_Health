@@ -110,14 +110,25 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
         };
       }
 
-      const stock = await tx.inventory.findUnique({
-        where: {
-          productId_warehouseId: {
-            productId: current.productId,
-            warehouseId: current.warehouseId,
+      let stock;
+      const isPostgres = process.env.DATABASE_URL?.startsWith("postgres");
+      if (isPostgres) {
+        const rows = await tx.$queryRawUnsafe<any[]>(
+          `SELECT * FROM "Inventory" WHERE "productId" = $1 AND "warehouseId" = $2 FOR UPDATE`,
+          current.productId,
+          current.warehouseId
+        );
+        stock = rows[0] || null;
+      } else {
+        stock = await tx.inventory.findUnique({
+          where: {
+            productId_warehouseId: {
+              productId: current.productId,
+              warehouseId: current.warehouseId,
+            },
           },
-        },
-      });
+        });
+      }
 
       if (!stock) {
         return {

@@ -76,12 +76,23 @@ export async function POST(req: NextRequest) {
 
     try {
       result = await prisma.$transaction(async (tx) => {
-        // Fetch inventory row within lock/transaction boundaries
-        const stock = await tx.inventory.findUnique({
-          where: {
-            productId_warehouseId: { productId, warehouseId },
-          },
-        });
+        // Fetch inventory row with database-level row locking if PostgreSQL is used
+        let stock;
+        const isPostgres = process.env.DATABASE_URL?.startsWith("postgres");
+        if (isPostgres) {
+          const rows = await tx.$queryRawUnsafe<any[]>(
+            `SELECT * FROM "Inventory" WHERE "productId" = $1 AND "warehouseId" = $2 FOR UPDATE`,
+            productId,
+            warehouseId
+          );
+          stock = rows[0] || null;
+        } else {
+          stock = await tx.inventory.findUnique({
+            where: {
+              productId_warehouseId: { productId, warehouseId },
+            },
+          });
+        }
 
         if (!stock) {
           return {
@@ -112,8 +123,8 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        // Create 3 minute hold reservation (3 * 60 * 1000 ms)
-        const expiresAt = new Date(Date.now() + 3 * 60 * 1000);
+        // Create 10 minute hold reservation (10 * 60 * 1000 ms)
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
         const reservation = await tx.reservation.create({
           data: {
             productId,
