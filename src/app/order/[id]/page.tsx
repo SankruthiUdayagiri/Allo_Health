@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import ThemeToggle from "../../../components/ThemeToggle";
 import { 
   CheckCircle, 
   MapPin, 
@@ -83,6 +84,11 @@ export default function OrderConfirmation() {
 
   return (
     <div className="relative min-h-screen pb-24 text-white bg-[#030307] flex items-center justify-center px-4">
+      {/* Floating Theme Toggle */}
+      <div className="absolute top-6 right-6 z-50">
+        <ThemeToggle />
+      </div>
+
       {/* Background glow */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[60vw] h-[60vw] bg-glow-emerald -z-10 rounded-full" />
 

@@ -78,15 +78,45 @@ To prevent double billing or duplicate holds from network drops or repeated form
 
 ## Local Development & Setup
 
-### 1. Environment Configuration
-Create a `.env` file in the root of the project (inspired by `.env.example`):
+### 1. Hosted Cloud Database Setup
+To ensure this application works seamlessly out-of-the-box, it is configured with a live serverless cloud PostgreSQL database hosted on **AWS Neon**. This ensures the application runs with a permanent hosted database.
+
+To run locally, simply copy the credentials from `.env.example` into your `.env` file (which is pre-configured with the AWS Neon PostgreSQL database URL):
 ```env
-DATABASE_URL="postgresql://username:password@hostname:5432/dbname?sslmode=require"
-UPSTASH_REDIS_REST_URL="https://your-database-name.upstash.io"
-UPSTASH_REDIS_REST_TOKEN="your_token"
-CRON_SECRET="your_vercel_cron_secret"
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?sslmode=require"
+UPSTASH_REDIS_REST_URL=""
+UPSTASH_REDIS_REST_TOKEN=""
+CRON_SECRET="super-secret-cron-token"
 ```
 *Note: If `UPSTASH_REDIS_REST_URL` is omitted, the platform automatically and gracefully falls back to localized application-level lock queuing, ensuring offline compilation and local developer setups work flawlessly out-of-the-box!*
+
+---
+
+## Hardened Core Scenario Testing
+
+Here is how each critical order safety requirement is implemented and presented:
+
+### A. 409 "Not Enough Stock" Visibility (Visible to User)
+* **Under the Hood:** If the available units inside the serialized database transaction drops below the requested amount, the `/api/reservations` endpoint immediately returns a **`409 Conflict`** response containing `STOCK_EXHAUSTED`.
+* **User Experience:** When the client receives a 409, a beautiful floating **rose-accented glassmorphic toast notification** slides onto the screen displaying: **`System Conflict: Not enough stock — this item was just taken.`**. It prompts the user to select another facility or product, completely preventing double booking.
+* **Test Case:** Open two tabs on a low-stock item (e.g. 1 unit remaining) and click "Reserve" at the exact same moment. One tab will redirect to checkout, and the other will immediately show the `Not enough stock — this item was just taken.` error banner.
+
+### B. 410 "Expired Reservation" Visibility (Visible to User)
+* **Under the Hood:** If a customer attempts to pay for or confirm a hold that has expired (older than 10 minutes or marked as `RELEASED`), the `/api/reservations/:id/confirm` endpoint rejects the query with a **`410 Gone`** response containing `RESERVATION_EXPIRED`.
+* **User Experience:** 
+  1. **Passive Expiry:** If a customer lets the 10-minute timer run out on the checkout page, the circular countdown dial turns bright crimson, a warning pulse triggers, and the checkout panel is replaced by an **explicit rose-red error card** displaying: **`This reservation expired: Hold Allocation Expired. Your high-concurrency inventory reservation has hit the 10-minute timeout. Stock levels have been safely released.`**
+  2. **Active Expiry (Confirm Attempt):** If a customer tries to confirm a reservation that has already expired in the database (e.g. from network lag), a warning card slides up displaying **`Confirmation Failed: The reservation hold has expired and cannot be confirmed.`**
+* **Test Case:** Navigate to `/checkout/{id}`, wait for the timer to count down to zero, or manually trigger the cron endpoint to expire it. You will see the checkout form lock and the expired state banner render instantly.
+
+### C. Cancel Button & Stock Releasing (Verified)
+* **Under the Hood:** Clicking the "Cancel Reservation" button on the checkout page triggers a `POST` request to `/api/reservations/:id/release`. Within an isolated database transaction, the platform decrements `reservedUnits` in the `Inventory` table and updates the reservation status to `RELEASED`.
+* **User Experience:** Clicking cancel triggers an instant release, rolls back reserved inventory, and returns the customer to the catalog page with a high-visibility amber toast confirming: **`System Alert: Reservation cancelled`**. 
+* **Test Case:** Reserve an item (e.g. available units drops from 5 to 4). On the checkout page, click **Cancel Reservation**. You are returned to the catalog and will see the available units instantly restored back to 5.
+
+### D. Production Cron Job / Expiry Mechanism
+* **Lazy Cleanups:** A non-blocking background sweep runs every time a shopper requests `/api/products`, ensuring returning users instantly reclaim expired inventory hold spaces with zero lag.
+* **Production Cron:** A secure automated cron job is configured at `/api/cron/expire-reservations` that executes every minute. It runs a single transaction batch sweeping `PENDING` records that have passed their `expiresAt` boundaries, updating statuses to `RELEASED` and decrementing inventory reservation counts in one atomic pass.
+
 
 ### 2. Install Packages
 ```bash

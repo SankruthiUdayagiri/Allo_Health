@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import ThemeToggle from "../components/ThemeToggle";
 import { 
   Activity, 
   Database, 
@@ -66,6 +67,14 @@ export default function Home() {
 
   // Warehouse selector tab/filter
   const [warehouseFilter, setWarehouseFilter] = useState<string>("ALL");
+
+  const showToast = React.useCallback((type: "success" | "error" | "warning", message: string) => {
+    const id = Math.random().toString(36).substring(2, 9);
+    setToasts((prev) => [...prev, { id, type, message }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 5000);
+  }, []);
 
   const fetchCatalog = async (silent = false) => {
     if (!silent) setLoading(true);
@@ -143,13 +152,7 @@ export default function Home() {
     });
   }, [warehouseFilter, products]);
 
-  const showToast = (type: "success" | "error" | "warning", message: string) => {
-    const id = Math.random().toString(36).substring(2, 9);
-    setToasts((prev) => [...prev, { id, type, message }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 5000);
-  };
+
 
   const triggerCleanup = async () => {
     setSystemCleaning(true);
@@ -286,6 +289,9 @@ export default function Home() {
               Admin Room
             </Link>
 
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
             {/* Replenish */}
             <button
               onClick={triggerRestock}
@@ -394,13 +400,13 @@ export default function Home() {
                   return (
                     <article 
                       key={product.id} 
-                      className="glass-card rounded-2xl overflow-hidden flex flex-col h-full border border-white/5 group hover:border-white/10 transition-all"
+                      className="glass-card rounded-2xl overflow-hidden flex flex-col h-full border border-white/5 group hover:border-white/20 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.4)]"
                     >
                       <div className="relative h-48 w-full overflow-hidden bg-neutral-900 border-b border-white/5">
                         <img
                           src={product.imageUrl}
                           alt={product.name}
-                          className="object-cover w-full h-full transition-transform duration-75 group-hover:scale-[1.01]"
+                          className="object-cover w-full h-full transition-transform duration-500 ease-out group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
                         <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">

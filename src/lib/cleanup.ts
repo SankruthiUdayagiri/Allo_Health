@@ -1,10 +1,19 @@
 import prisma from "./prisma";
 
 let locked = false;
+let lastCleanupTime = 0;
 
 export async function clearExpired(): Promise<number> {
   if (locked) return 0;
+  
+  const now = Date.now();
+  // Throttle background sweeps to at most once every 30 seconds
+  if (now - lastCleanupTime < 30000) {
+    return 0;
+  }
+  
   locked = true;
+  lastCleanupTime = now;
 
   try {
     const expired = await prisma.reservation.findMany({

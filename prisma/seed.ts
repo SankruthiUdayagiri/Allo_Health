@@ -114,7 +114,9 @@ async function main() {
       
       // Determine a realistic stock count based on indices
       let totalUnits = 20;
-      if (i % 3 === 0 && j === 0) {
+      if (product.sku === "ALLO-PE-SPRAY" && warehouse.id === wMumbai.id) {
+        totalUnits = 5; // Exactly 5 units for stress test verification
+      } else if (i % 3 === 0 && j === 0) {
         totalUnits = 3; // Low stock
       } else if (i % 4 === 1 && j === 2) {
         totalUnits = 0; // Out of stock

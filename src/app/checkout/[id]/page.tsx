@@ -3,6 +3,7 @@
 import React, { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import ThemeToggle from "../../../components/ThemeToggle";
 import { 
   Lock, 
   MapPin, 
@@ -54,7 +55,8 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
   const [confirming, setConfirming] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   
-  const [timeLeft, setTimeLeft] = useState<number>(600); // 10 minutes (600s) default
+  const TOTAL_DURATION_SECONDS = 3 * 60; // 3 minutes
+  const [timeLeft, setTimeLeft] = useState<number>(TOTAL_DURATION_SECONDS);
   const [isExpired, setIsExpired] = useState(false);
   
   const [statusMessage, setStatusMessage] = useState<{
@@ -135,17 +137,21 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
   }, [timeLeft, isExpired, loading, statusMessage]);
 
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
+    if (hrs > 0) {
+      return `${hrs.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    }
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const progress = Math.min(1, timeLeft / 600);
+  const progress = Math.min(1, timeLeft / TOTAL_DURATION_SECONDS);
   const strokeDashoffset = circumference - progress * circumference;
 
-  // Determine countdown colors based on exact spec: Turns RED under 2 minutes (< 120s)
+  // Determine countdown colors: Turns RED under 1 minute (< 60s), AMBER under 2 minutes (< 120s)
   const getTimerColors = () => {
-    if (timeLeft >= 300) { // Green for 5+ minutes
+    if (timeLeft >= 120) { // Green for 2+ minutes
       return {
         text: "text-emerald-400",
         stroke: "stroke-emerald-500",
@@ -153,7 +159,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
         ring: "shadow-[0_0_20px_rgba(16,185,129,0.2)]",
       };
     }
-    if (timeLeft >= 120) { // Amber for 2 to 5 minutes
+    if (timeLeft >= 60) { // Amber for 1 to 2 minutes
       return {
         text: "text-amber-400",
         stroke: "stroke-amber-500",
@@ -161,7 +167,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
         ring: "shadow-[0_0_20px_rgba(245,158,11,0.2)]",
       };
     }
-    // turns red at <2 minutes required
+    // turns red at <1 minute (60s)
     return {
       text: "text-rose-500 animate-pulse font-extrabold",
       stroke: "stroke-rose-600",
@@ -254,13 +260,16 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
               <span className="text-xs block text-violet-400 font-semibold tracking-wider uppercase -mt-1">Billing Terminal</span>
             </div>
           </div>
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-white transition-colors uppercase tracking-wider"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            BACK TO CATALOG
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-white transition-colors uppercase tracking-wider"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              BACK TO CATALOG
+            </Link>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
@@ -386,7 +395,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                     </div>
                     <h2 className="text-xl font-bold text-white mt-4">Hold Allocation Expired</h2>
                     <p className="text-xs leading-relaxed text-zinc-400 max-w-sm mx-auto font-medium">
-                      Your high-concurrency inventory reservation has hit the 10-minute timeout. Stock levels have been safely released to prevent catalog leakage.
+                      Your high-concurrency inventory reservation has hit the 3-minute timeout. Stock levels have been safely released to prevent catalog leakage.
                     </p>
                   </div>
 
@@ -497,7 +506,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                 <div className="text-[11px] leading-relaxed text-zinc-400 max-w-[200px] font-medium">
                   {isExpired 
                     ? "Lock expired. Stock levels reclaimed by fulfillment depots."
-                    : timeLeft >= 120 
+                    : timeLeft >= 60 
                     ? "Items are safely reserved for your purchase."
                     : "WARNING: Complete checkout immediately before stock allocation drops!"}
                 </div>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import ThemeToggle from "../../components/ThemeToggle";
 import { 
   ShieldAlert, 
   RefreshCw, 
@@ -107,13 +108,16 @@ export default function AdminDashboard() {
             </div>
           </div>
           
-          <button 
-            onClick={loadReservations}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
-          >
-            <RefreshCw className="w-4 h-4" />
-            Sync Ledger
-          </button>
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={loadReservations}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Sync Ledger
+            </button>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 

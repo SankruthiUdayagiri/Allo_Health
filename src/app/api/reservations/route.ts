@@ -112,8 +112,8 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        // Create 10 minute hold reservation
-        const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+        // Create 3 minute hold reservation (3 * 60 * 1000 ms)
+        const expiresAt = new Date(Date.now() + 3 * 60 * 1000);
         const reservation = await tx.reservation.create({
           data: {
             productId,
